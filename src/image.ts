@@ -1,8 +1,7 @@
 import path from "path";
 import { environment, showToast, Image, Toast } from "@raycast/api";
 import { promises as fs } from "fs";
-import { jiraFetch } from "./jira";
-import { Warning } from "./exception";
+import { jiraFetch, Warning } from "./api";
 
 interface ImageSpec {
   urlPath: string;
@@ -56,13 +55,24 @@ function parseImageUrl(url: string): ImageSpec {
         key: g.key,
       }),
     },
+    {
+      pattern: /\/secure\/viewavatar\?size=(?<size>[a-z]+)&avatarId=(?<key>\d+)&avatarType=(?<imageType>[a-z]+)/i,
+      spec: (g) => ({
+        urlPath: url, // 使用原始 URL，而不是构造新的
+        imageType: g.imageType,
+        key: g.key,
+      }),
+    },
   ];
-  const imgSpec = matcher
-    .map((m) => ({ matcher: m, match: url.match(m.pattern) }))
-    .map((m) => (m.match && m.match.groups ? m.matcher.spec(m.match.groups) : undefined))
-    .find((imgSpec) => imgSpec !== undefined);
-  if (!imgSpec) throw new Warning(`Unexpected icon path ${url}`);
-  return imgSpec;
+
+  for (const m of matcher) {
+    const match = url.match(m.pattern);
+    if (match && match.groups) {
+      return m.spec(match.groups);
+    }
+  }
+
+  throw new Warning(`Unexpected icon path ${url}`);
 }
 
 export async function jiraImage(url: string): Promise<Image.ImageLike | undefined> {
@@ -70,16 +80,20 @@ export async function jiraImage(url: string): Promise<Image.ImageLike | undefine
     const imageSpec = parseImageUrl(url);
     const path = filePath(imageSpec);
     const isAvailable = await isFile(path);
-    return isAvailable ? path : await downloadImage(imageSpec, path);
+    if (isAvailable) {
+      return path;
+    } else {
+      return await downloadImage(imageSpec, path);
+    }
   } catch (e) {
     if (e instanceof Warning) {
       console.warn(e);
-      return url;
+      return url; // 直接返回原始 URL，不再递归调用
     } else {
       console.error(e);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to get Jira Icons",
+        title: "获取 Jira 图标失败",
         message: e instanceof Error ? e.message : undefined,
       });
       return undefined;

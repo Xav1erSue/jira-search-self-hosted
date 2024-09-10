@@ -1,8 +1,8 @@
-import { jiraFetchObject, jiraUrl } from "./jira";
+import { jiraFetchObject, jiraUrl } from "./api";
 import { jiraImage } from "./image";
 import { ResultItem, SearchCommand } from "./command";
 import { Color, Icon, Image } from "@raycast/api";
-import { ErrorText } from "./exception";
+import { PresentableError } from "./api";
 
 interface IssueType {
   id: string;
@@ -105,11 +105,10 @@ function jqlFor(query: string): string {
 export async function searchIssues(query: string): Promise<ResultItem[]> {
   const jql = jqlFor(query);
   console.debug(jql);
-  const result = await jiraFetchObject<Issues>(
-    "/rest/api/2/search",
-    { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project or issue type") },
-  );
+  const result = await jiraFetchObject<Issues>("/rest/api/2/search", {
+    params: { jql, fields },
+    statusErrors: { 400: new PresentableError("Invalid Query", "Unknown project or issue type") },
+  });
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
     title: issue.fields.summary,

@@ -11,7 +11,8 @@
     "ryanp",
     "LunaticMuch",
     "nick318",
-    "marinsokol"
+    "marinsokol",
+    "Xav1erSue"
   ],
   "license": "MIT",
   "commands": [
@@ -46,44 +47,45 @@
   ],
   "preferences": [
     {
-      "name": "domain",
+      "name": "baseURL",
       "type": "textfield",
       "required": true,
-      "title": "Jira Domain",
-      "description": "Your Jira Base URL (e.g. 'my.atlassian.net' or 'your.server.url/baseUrl/jira)",
-      "placeholder": "my.atlassian.net"
+      "title": "Jira BaseURL",
+      "description": "你的 Jira BaseURL",
+      "placeholder": "http://localhost:8080"
     },
     {
-      "name": "token",
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "用户名",
+      "description": "你的 Jira 用户名",
+      "placeholder": "请输入用户名"
+    },
+    {
+      "name": "password",
       "type": "password",
       "required": true,
-      "title": "Personal Access Token",
-      "description": "Your API token as described at https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html"
-    },
-    {
-      "name": "unsafeHTTPS",
-      "type": "checkbox",
-      "required": false,
-      "title": "Unsafe HTTPS",
-      "description": "Enable to use unsafe HTTPS for self-signed certificates.",
-      "default": false,
-      "label": "Enable"
+      "title": "密码",
+      "description": "你的 Jira 密码",
+      "placeholder": "请输入密码"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.3",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^20.5.7",
-    "@types/react": "^18.2.21",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
-    "eslint": "^8.48.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "react-devtools": "^4.28.0",
-    "typescript": "^5.2.2"
+    "eslint-config-prettier": "^9.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",

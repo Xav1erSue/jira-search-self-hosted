@@ -1,8 +1,8 @@
-import { jiraFetchObject, jiraUrl } from "./jira";
+import { jiraFetchObject, jiraUrl } from "./api";
 import { jiraImage } from "./image";
 import { ResultItem, SearchCommand } from "./command";
 import { Color, Icon, Image } from "@raycast/api";
-import { ErrorText } from "./exception";
+import { PresentableError } from "./api";
 
 interface IssueType {
   id: string;
@@ -74,11 +74,11 @@ function isIssueKey(query: string): boolean {
 function buildJql(query: string, assignee: string): string {
   const spaceAndInvalidChars = /[ "]/;
 
-  const statusRegex = /!([a-z0-9_-]+|"[a-z0-9_ -]+")/gi;
+  const statusRegex = /!(\w+|[\u4e00-\u9fa5]+)/gi;
   const statusMatchingGroup = Array.from(query.matchAll(statusRegex));
-  const statuus = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
+  const status = statusMatchingGroup.map((item) => item[1].replace(/^"|"$/g, ""));
 
-  console.log("Status: ", statuus);
+  console.log("Status: ", status);
   query = query.replace(statusRegex, "");
 
   const terms = query.split(spaceAndInvalidChars).filter((term) => term.length > 0);
@@ -102,8 +102,8 @@ function buildJql(query: string, assignee: string): string {
   const jqlConditions = [
     inClause("project", projects),
     inClause("issueType", issueTypes),
-    inClause("status", statuus),
-    inClause("assignee", [assignee]),
+    inClause("status", status),
+    inClause("Fe人员", [assignee]),
     "statusCategory != Done",
     ...textTerms.map((term) => `text~"${term}*"`),
   ];
@@ -120,11 +120,10 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
   const myselfResult = await jiraFetchObject<User>("/rest/api/2/myself");
   const jql = jqlFor(query, myselfResult.emailAddress);
   console.debug(jql);
-  const result = await jiraFetchObject<Issues>(
-    "/rest/api/2/search",
-    { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project or issue type") },
-  );
+  const result = await jiraFetchObject<Issues>("/rest/api/2/search", {
+    params: { jql, fields },
+    statusErrors: { 400: new PresentableError("Invalid Query", "Unknown project or issue type") },
+  });
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
     title: issue.fields.summary,

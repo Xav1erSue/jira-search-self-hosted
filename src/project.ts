@@ -1,5 +1,5 @@
 import { ResultItem as GeneralResultItem, SearchCommand } from "./command";
-import { jiraFetchObject, jiraUrl } from "./jira";
+import { jiraFetchObject, jiraUrl } from "./api";
 import { jiraImage } from "./image";
 
 interface Project {

@@ -1,6 +1,6 @@
 import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ErrorText } from "./exception";
+import { PresentableError } from "./api";
 
 export type ResultItem = List.Item.Props & {
   url: string;
@@ -15,7 +15,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<ResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<ErrorText>();
+  const [error, setError] = useState<PresentableError>();
   useEffect(() => {
     setError(undefined);
     setIsLoading(true);
@@ -28,7 +28,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
         setItems([]);
         console.warn(e);
         if (e instanceof Error) {
-          setError(ErrorText(e.name, e.message));
+          setError(new PresentableError(e.name, e.message));
         }
       })
       .finally(() => {

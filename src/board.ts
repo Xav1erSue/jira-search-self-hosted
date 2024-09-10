@@ -1,5 +1,5 @@
 import { ResultItem, SearchCommand } from "./command";
-import { jiraFetchObject, jiraUrl } from "./jira";
+import { jiraFetchObject, jiraUrl } from "./api";
 import { jiraImage } from "./image";
 
 interface Board {
@@ -17,7 +17,7 @@ interface Boards {
 
 export async function searchBoards(query: string): Promise<ResultItem[]> {
   const result = await jiraFetchObject<Boards>("/rest/agile/1.0/board", {
-    name: query,
+    params: { name: query },
   });
   const mapResult = async (board: Board): Promise<ResultItem> => {
     const resultDetails: ResultItem = {
